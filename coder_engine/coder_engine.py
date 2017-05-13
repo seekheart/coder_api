@@ -33,10 +33,10 @@ class CoderEngine:
         """
         A find one method to get all languages known by user queried
 
-        :argument
+        Args:
         user_name - (string) user to be queried for
 
-        :returns
+        Returns:
         json of user with programming languages known
         """
 
@@ -52,3 +52,47 @@ class CoderEngine:
         """
 
         return [user for user in self.db.find()]
+
+    def add_user(self, user_name, languages):
+        """
+        A method to add a new user and his/her known programming languages
+
+        Args:
+            user_name: (str) - user name
+            languages: (list of str) - languages known by user
+
+        Returns:
+            None
+
+        """
+
+        document = {'username': user_name, 'languages': languages}
+        self.db.insert_one(document)
+
+    def delete_user(self, user_name):
+        """
+        A method to delete a user from the collection
+
+        Args:
+            user_name: (str) name of user to be deleted
+
+        Returns:
+            None
+
+        """
+
+        self.db.delete_one({'username': user_name})
+
+    def update_user(self, user_name, field):
+        """
+        A method to update a user in collection
+        Args:
+            user_name: (str) - username to look up
+            field: (dict) - field to edit in user collection
+
+        Returns:
+            None
+
+        """
+
+        self.db.update_one({'username': user_name}, {'$set': field})
