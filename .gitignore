@@ -93,3 +93,4 @@ ENV/
 
 # test data and secrets
 test_data.json
+test_data_lang.json
