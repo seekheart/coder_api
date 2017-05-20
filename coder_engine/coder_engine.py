@@ -95,4 +95,6 @@ class CoderEngine:
 
         """
 
+        print(field)
+
         self.db.update_one({'username': user_name}, {'$set': field})
