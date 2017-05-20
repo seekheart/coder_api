@@ -11,12 +11,13 @@ class CoderEngine:
         """
         Constructor method for an engine to connect to mongo
 
-        :argument
+        Args:
         host - (str) host for the database usually localhost or some ip
         port - (int) port number to connect/listen on usually 27017
         db_name - (str) name of db to connect to on mongo
         collection_name (str) - name of mongo collection to query on
         """
+
         self.host = host
         self.port = port
         self.db_name = db_name
@@ -29,72 +30,95 @@ class CoderEngine:
         except:
             print('Error unable to connect to {} in {}'.format(collection_name, db_name))
 
-    def get_user(self, user_name):
+    def get_one(self, lookup):
         """
-        A find one method to get all languages known by user queried
+        A find one method to get a specific document of a collection
 
         Args:
-        user_name - (string) user to be queried for
+        lookup - (str) a unique term to identify a single document
 
         Returns:
-        json of user with programming languages known
+        json document
         """
 
-        return self.db.find_one({'username': user_name})
+        if not lookup:
+            raise ValueError('Lookup cannot be Null!')
+        document = {}
 
-    def get_all_users(self):
+        if self.collection_name == 'users':
+            document = {'username': lookup}
+        elif self.collection_name == 'languages':
+            document = {'name': lookup}
+        return self.db.find_one(document)
+
+    def get_all(self):
         """
-        A method to get all user data in a collection
+        A method to get all documents in the collection
 
         Returns:
-            list of dicts of users
+            collection of documents
 
         """
 
-        return [user for user in self.db.find()]
+        return [doc for doc in self.db.find()]
 
-    def add_user(self, user_name, languages):
+    def add_one(self, lookup, data):
         """
-        A method to add a new user and his/her known programming languages
+        A method to add a new document to the collection
 
         Args:
-            user_name: (str) - user name
-            languages: (list of str) - languages known by user
+            lookup: (str) - a string that is unique for look ups
+            data: (list of str) - data to be entered for this look up
 
         Returns:
             None
 
         """
 
-        document = {'username': user_name, 'languages': languages}
+        document = {}
+
+        if self.collection_name == 'users':
+            document = {'username': lookup, 'languages': data}
+        elif self.collection_name == 'languages':
+            document = {'name': lookup, 'users': data}
         self.db.insert_one(document)
 
-    def delete_user(self, user_name):
+    def delete_one(self, lookup):
         """
         A method to delete a user from the collection
 
         Args:
-            user_name: (str) name of user to be deleted
+            lookup: (str) lookup term that is unique to delete on
 
         Returns:
             None
 
         """
 
-        self.db.delete_one({'username': user_name})
+        document = {}
 
-    def update_user(self, user_name, field):
+        if self.collection_name == 'users':
+            document = {'username': lookup}
+        elif self.collection_name == '':
+            document = {'name': lookup}
+        self.db.delete_one(document)
+
+    def update_one(self, lookup, field):
         """
         A method to update a user in collection
         Args:
-            user_name: (str) - username to look up
-            field: (dict) - field to edit in user collection
+            lookup: (str) - lookup term
+            field: (dict) - field to edit in collection document
 
         Returns:
             None
 
         """
 
-        print(field)
+        document = {}
 
-        self.db.update_one({'username': user_name}, {'$set': field})
+        if self.collection_name == 'users':
+            document = {'username': lookup}
+        elif self.collection_name == 'languages':
+            document = {'name': lookup}
+        self.db.update_one(document, {'$set': field})

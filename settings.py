@@ -1,7 +1,8 @@
 MONGO_HOST = 'localhost'
 MONGO_PORT = 27017
 MONGO_DB = 'coder'
-MONGO_COLLECTION = 'users'
+MONGO_USER_COLLECTION = 'users'
+MONGO_LANGUAGES_COLLECTION = 'languages'
 HOST = '0.0.0.0'
 PORT = 3000
 DEBUG = True
