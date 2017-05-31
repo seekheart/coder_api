@@ -5,19 +5,19 @@ Mike Tung
 
 from flask import Flask, jsonify, request, abort
 
+import settings
 from coder_engine.coder_engine import CoderEngine
-from settings import *
 
 app = Flask(__name__)
-coders_engine = CoderEngine(MONGO_HOST,
-                            MONGO_PORT,
-                            MONGO_DB,
-                            MONGO_USER_COLLECTION
+coders_engine = CoderEngine(settings.MONGO_HOST,
+                            settings.MONGO_PORT,
+                            settings.MONGO_DB,
+                            settings.MONGO_COLLECTIONS
                             )
-languages_engine = CoderEngine(MONGO_HOST,
-                               MONGO_PORT,
-                               MONGO_DB,
-                               MONGO_LANGUAGES_COLLECTION
+languages_engine = CoderEngine(settings.MONGO_HOST,
+                               settings.MONGO_PORT,
+                               settings.MONGO_DB,
+                               settings.MONGO_COLLECTIONS
                                )
 
 
@@ -32,12 +32,12 @@ def users():
         data = coders_engine.get_all()
         payload = []
         for user in data:
-            current_user = {}
+            current_users = {}
             for k, v in user.items():
                 if k == '_id':
                     continue
-                current_user[k] = v
-            payload.append(current_user)
+                current_users[k] = v
+            payload.append(current_users)
         return jsonify(payload)
     elif request.method == 'POST':
         data = request.get_json()
@@ -113,4 +113,5 @@ def one_language(language):
 
 
 if __name__ == '__main__':
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    app.run(host=settings.HOST, port=settings.PORT, debug=settings.DEBUG,
+            threaded=settings.MULTITHREADING)

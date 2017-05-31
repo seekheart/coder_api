@@ -7,38 +7,44 @@ import pymongo
 
 
 class CoderEngine:
-    def __init__(self, host, port, db_name, collection_name):
+    def __init__(self, host: str, port: int, db_name: str, collections: dict,
+                 selected_collection: str = 'users'):
         """
-        Constructor method for an engine to connect to mongo
+        Constructor method for a Mongo Database Coder Engine
 
         Args:
-        host - (str) host for the database usually localhost or some ip
-        port - (int) port number to connect/listen on usually 27017
-        db_name - (str) name of db to connect to on mongo
-        collection_name (str) - name of mongo collection to query on
+            host: hostname for mongo to connect on
+            port: port mongo is listening on
+            db_name: name of database in mongo
+            collections: collections available in the database
+            selected_collection: collection currently set to be used by engine
+            defaults to users
         """
 
-        self.host = host
-        self.port = port
+        self._host = host
+        self._port = port
         self.db_name = db_name
-        self.collection_name = collection_name
-
-        self.client = pymongo.MongoClient(self.host, self.port)
+        self.collections = collections
+        self.selected_collection = selected_collection
+        self._client = pymongo.MongoClient(self.host, self.port)
 
         try:
-            self.db = self.client[self.db_name].get_collection(self.collection_name)
-        except:
-            print('Error unable to connect to {} in {}'.format(collection_name, db_name))
+            self.db = self._client[self.db_name] \
+                .get_collection(selected_collection)
+        except ConnectionError as e:
+            print('Error unable to connect to {} in {}'.format(
+                selected_collection, db_name))
 
-    def get_one(self, lookup):
+    # TODO refactor if else statements
+    def get_one(self, lookup: str) -> dict:
         """
-        A find one method to get a specific document of a collection
+        Find one method for a given collection
 
         Args:
-        lookup - (str) a unique term to identify a single document
+            lookup: a unique term to search a collection for specific document
 
         Returns:
-        json document
+             A json document matching the lookup or an empty json if no match
         """
 
         if not lookup:
