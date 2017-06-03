@@ -19,6 +19,9 @@ class CoderEngine:
             collections: collections available in the database
             selected_collection: collection currently set to be used by engine
             defaults to users
+
+        Returns:
+            Instance of the coder engine
         """
 
         self._host = host
@@ -26,7 +29,7 @@ class CoderEngine:
         self.db_name = db_name
         self.collections = collections
         self.selected_collection = selected_collection
-        self._client = pymongo.MongoClient(self.host, self.port)
+        self._client = pymongo.MongoClient(host, port)
 
         try:
             self.db = self._client[self.db_name] \
@@ -51,9 +54,9 @@ class CoderEngine:
             raise ValueError('Lookup cannot be Null!')
         document = {}
 
-        if self.collection_name == 'users':
+        if self.selected_collection == 'users':
             document = {'username': lookup}
-        elif self.collection_name == 'languages':
+        elif self.selected_collection == 'languages':
             document = {'name': lookup}
         return self.db.find_one(document)
 
@@ -83,9 +86,9 @@ class CoderEngine:
 
         document = {}
 
-        if self.collection_name == 'users':
+        if self.selected_collection == 'users':
             document = {'username': lookup, 'languages': data}
-        elif self.collection_name == 'languages':
+        elif self.selected_collection == 'languages':
             document = {'name': lookup, 'users': data}
         self.db.insert_one(document)
 
@@ -103,9 +106,9 @@ class CoderEngine:
 
         document = {}
 
-        if self.collection_name == 'users':
+        if self.selected_collection == 'users':
             document = {'username': lookup}
-        elif self.collection_name == '':
+        elif self.selected_collection == '':
             document = {'name': lookup}
         self.db.delete_one(document)
 
@@ -123,8 +126,8 @@ class CoderEngine:
 
         document = {}
 
-        if self.collection_name == 'users':
+        if self.selected_collection == 'users':
             document = {'username': lookup}
-        elif self.collection_name == 'languages':
+        elif self.selected_collection == 'languages':
             document = {'name': lookup}
         self.db.update_one(document, {'$set': field})
