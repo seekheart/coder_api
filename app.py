@@ -20,7 +20,6 @@ languages_engine = CoderEngine(settings.MONGO_HOST,
                                settings.MONGO_COLLECTIONS
                                )
 
-
 @app.route('/')
 def test() -> str:
     """
@@ -40,6 +39,7 @@ def users() -> dict:
     Returns:
         list of users if success else 404 response is sent
     """
+
     data = coders_engine.get_all()
     payload = []
     for user in data:
@@ -60,13 +60,17 @@ def post_users() -> dict:
     Returns:
         Confirmation message if success else 400 bad request
     """
+
     data = request.get_json()
+
     try:
         user_name = data['username']
         languages = data['languages']
         coders_engine.add_one(user_name, languages)
-    except KeyError as e:
+    except KeyError:
         abort(400)
+    except ValueError:
+        abort(409)
 
     return jsonify({'success': True})
 
@@ -83,9 +87,10 @@ def get_one_user(user: str) -> dict:
         specified user data
     """
     data = coders_engine.get_one(user)
+    payload = None
     try:
         payload = {k: v for k, v in data.items() if k != '_id'}
-    except AttributeError as e:
+    except AttributeError:
         abort(404)
     return jsonify(payload)
 
@@ -108,7 +113,7 @@ def delete_one_user(user: str) -> dict:
 
 
 @app.route('/users/<user>', methods=['PATCH'])
-def edit_one_user(user: dict) -> dict:
+def edit_one_user(user: str) -> dict:
     """
     Patch route to edit a user's data
 
@@ -120,11 +125,11 @@ def edit_one_user(user: dict) -> dict:
     """
     new_data = request.get_json()
 
-    if len(new_data.keys()) < 1:
+    if len(new_data) < 1:
         abort(400)
     try:
         coders_engine.update_one(user, new_data)
-    except ValueError as e:
+    except ValueError:
         abort(404)
 
     return jsonify({'updated': True})
@@ -169,7 +174,7 @@ def add_languages() -> dict:
     try:
         lang_name = data['name']
         lang_users = data['users']
-    except KeyError as e:
+    except KeyError:
         abort(400)
 
     languages_engine.add_one(lang_name, lang_users)

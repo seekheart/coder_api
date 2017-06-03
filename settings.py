@@ -10,6 +10,7 @@ ENV = os.environ.get('APP_ENV', 'DEV')
 
 # Common settings here
 PORT = int(os.environ.get('PORT', 3000))
+MULTITHREADING = False
 
 # Mongo settings
 MONGO_COLLECTIONS = {
@@ -22,7 +23,7 @@ MONGO_DB = os.environ.get('MONGO_DB', None)
 # For each environment setting, some common settings maybe overridden
 if ENV is 'PROD':
     HOST = os.environ.get('HOST', None)
-    int(PORT=os.environ.get('PORT', None))
+    PORT = int(os.environ.get('PORT', None))
     DEBUG = False
     MULTITHREADING = True
 else:

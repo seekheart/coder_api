@@ -38,7 +38,29 @@ class CoderEngine:
             print('Error unable to connect to {} in {}'.format(
                 selected_collection, db_name))
 
-    # TODO refactor if else statements
+    def _get_document_keys(self) -> list:
+        """
+        Private method to make documents for fetching/adding
+
+        Returns:
+            list of document key(s) depending on search flag
+
+        """
+
+        document_keys = {
+            'users': ['username', 'languages'],
+            'languages': ['name', 'users']
+        }
+
+        document = []
+
+        try:
+            document = document_keys[self.selected_collection]
+        except KeyError as e:
+            print(e)
+
+        return document
+
     def get_one(self, lookup: str) -> dict:
         """
         Find one method for a given collection
@@ -50,17 +72,14 @@ class CoderEngine:
              A json document matching the lookup or an empty json if no match
         """
 
-        if not lookup:
-            raise ValueError('Lookup cannot be Null!')
-        document = {}
+        doc_key = self._get_document_keys().copy()
+        del doc_key[-1]
+        doc_val = [lookup]
+        document = dict(zip(doc_key, doc_val))
 
-        if self.selected_collection == 'users':
-            document = {'username': lookup}
-        elif self.selected_collection == 'languages':
-            document = {'name': lookup}
         return self.db.find_one(document)
 
-    def get_all(self):
+    def get_all(self) -> list:
         """
         A method to get all documents in the collection
 
@@ -71,63 +90,60 @@ class CoderEngine:
 
         return [doc for doc in self.db.find()]
 
-    def add_one(self, lookup, data):
+    def add_one(self, lookup: str, data: dict) -> None:
         """
         A method to add a new document to the collection
 
         Args:
-            lookup: (str) - a string that is unique for look ups
-            data: (list of str) - data to be entered for this look up
+            lookup: A unique key to search on
+            data: data to be entered for this look up
 
         Returns:
             None
 
         """
 
-        document = {}
+        if self.get_one(lookup):
+            raise ValueError('Error {} already exists'.format(lookup))
 
-        if self.selected_collection == 'users':
-            document = {'username': lookup, 'languages': data}
-        elif self.selected_collection == 'languages':
-            document = {'name': lookup, 'users': data}
+        doc_key = self._get_document_keys()
+        doc_val = [lookup, data]
+        document = dict(zip(doc_key, doc_val))
+
         self.db.insert_one(document)
 
-    def delete_one(self, lookup):
+    def delete_one(self, lookup: str) -> None:
         """
         A method to delete a user from the collection
 
         Args:
-            lookup: (str) lookup term that is unique to delete on
+            lookup: lookup term that is unique to delete on
 
         Returns:
             None
 
         """
 
-        document = {}
+        doc_key = self._get_document_keys()
+        doc_val = [lookup]
+        document = dict(zip(doc_key, doc_val))
 
-        if self.selected_collection == 'users':
-            document = {'username': lookup}
-        elif self.selected_collection == '':
-            document = {'name': lookup}
         self.db.delete_one(document)
 
-    def update_one(self, lookup, field):
+    def update_one(self, lookup: str, field: dict) -> None:
         """
         A method to update a user in collection
+
         Args:
-            lookup: (str) - lookup term
-            field: (dict) - field to edit in collection document
+            lookup: lookup term
+            field: field to edit in collection document
 
         Returns:
             None
 
         """
 
-        document = {}
-
-        if self.selected_collection == 'users':
-            document = {'username': lookup}
-        elif self.selected_collection == 'languages':
-            document = {'name': lookup}
+        doc_key = self._get_document_keys()
+        doc_val = [lookup]
+        document = dict(zip(doc_key, doc_val))
         self.db.update_one(document, {'$set': field})
