@@ -19,6 +19,7 @@ languages_engine = CoderEngine(settings.MONGO_HOST,
                                settings.MONGO_DB,
                                settings.MONGO_COLLECTIONS
                                )
+languages_engine.selected_collection = 'languages'
 
 @app.route('/')
 def test() -> str:
@@ -61,18 +62,20 @@ def post_users() -> dict:
         Confirmation message if success else 400 bad request
     """
 
-    data = request.get_json()
+    data = request.form
 
     try:
         user_name = data['username']
         languages = data['languages']
-        coders_engine.add_one(user_name, languages)
     except KeyError:
         abort(400)
+
+    try:
+        coders_engine.add_one(user_name, languages)
     except ValueError:
         abort(409)
 
-    return jsonify({'success': True})
+    return 'Ok', 201
 
 
 @app.route('/users/<user>', methods=['GET'])
@@ -86,6 +89,7 @@ def get_one_user(user: str) -> dict:
     Returns:
         specified user data
     """
+
     data = coders_engine.get_one(user)
     payload = None
     try:
@@ -96,7 +100,7 @@ def get_one_user(user: str) -> dict:
 
 
 @app.route('/users/<user>', methods=['DELETE'])
-def delete_one_user(user: str) -> dict:
+def delete_one_user(user: str) -> tuple:
     """
     Delete route to remove a user
 
@@ -104,16 +108,16 @@ def delete_one_user(user: str) -> dict:
         user: username to search and delete
 
     Returns:
-        delete message if success else 400 bad request
+        status code for either success 204 or failure 400
     """
     if not coders_engine.get_one(user):
         abort(400)
     coders_engine.delete_one(user)
-    return jsonify({'deleted': True})
+    return '', 204
 
 
 @app.route('/users/<user>', methods=['PATCH'])
-def edit_one_user(user: str) -> dict:
+def edit_one_user(user: str) -> tuple:
     """
     Patch route to edit a user's data
 
@@ -123,7 +127,7 @@ def edit_one_user(user: str) -> dict:
     Returns:
         update message if success else 404 not found or 400 if bad data
     """
-    new_data = request.get_json()
+    new_data = request.form
 
     if len(new_data) < 1:
         abort(400)
@@ -132,7 +136,8 @@ def edit_one_user(user: str) -> dict:
     except ValueError:
         abort(404)
 
-    return jsonify({'updated': True})
+    return '', 204
+
 
 
 @app.route('/languages', methods=['GET'])
@@ -191,6 +196,7 @@ def get_one_language(language: str) -> dict:
     Returns:
         Queried language data in json time
     """
+
     data = languages_engine.get_one(language)
     payload = {k: v for k, v in data.items() if k != '_id'}
     return jsonify(payload)

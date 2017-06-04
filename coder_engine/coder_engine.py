@@ -103,6 +103,8 @@ class CoderEngine:
 
         """
 
+        if lookup is None:
+            raise TypeError('Lookup must be string!')
         if self.get_one(lookup):
             raise ValueError('Error {} already exists'.format(lookup))
 
