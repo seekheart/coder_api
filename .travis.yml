@@ -1,6 +1,7 @@
 os:
-  - "osx"
   - "linux"
+  dist: trusty
+
 language: python
 python:
   - "3.3"
