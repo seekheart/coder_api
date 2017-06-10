@@ -1,0 +1,23 @@
+language: python
+python:
+  - "3.3"
+  - "3.6"
+install: "pip install -r requirements.txt"
+
+services:
+  - mongodb
+
+script: nosetests
+
+before_script:
+  - bash mocking/mongodb_seeder.bash
+
+notification:
+  email:
+    on_success: always
+    on_failure: change
+
+branches:
+  only:
+  - master
+  - dev
