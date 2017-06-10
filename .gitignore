@@ -91,6 +91,3 @@ ENV/
 # Idea
 .idea/
 
-# test data and secrets
-test_data.json
-test_data_lang.json
