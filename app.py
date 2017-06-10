@@ -57,9 +57,10 @@ def post_users() -> tuple:
     """
 
     try:
+        r = request.get_json()
         data = {
-            'username': request.form['username'],
-            'languages': request.form['languages']
+            'username': r['username'],
+            'languages': r['languages']
         }
     except ValueError:
         abort(400)
@@ -71,6 +72,20 @@ def post_users() -> tuple:
     except ValueError:
         abort(500)
 
+    for lang in data['languages']:
+        doc = languages_engine.get_one(lang)
+        try:
+            doc.pop('_id', None)
+        except AttributeError:
+            pass
+        if doc:
+            if data['username'] not in doc['users']:
+                doc['users'].append(data['username'])
+                languages_engine.update_one(lang, doc)
+            continue
+        else:
+            doc = {'name': lang, 'users': [data['username']]}
+            languages_engine.add_one(doc)
 
     return 'Ok', 201
 
@@ -112,6 +127,16 @@ def delete_one_user(user: str) -> tuple:
     if not coders_engine.get_one(user):
         abort(400)
     coders_engine.delete_one(user)
+
+    # remove user from language collection
+    for lang in languages_engine.get_all():
+        try:
+            lang.pop('_id', None)
+        except AttributeError:
+            pass
+        if user in lang['users']:
+            lang['users'].remove(user)
+            languages_engine.update_one(lang['name'], lang)
     return '', 204
 
 
@@ -127,7 +152,7 @@ def edit_one_user(user: str) -> tuple:
     Returns:
         update message if success else 404 not found or 400 if bad data
     """
-    new_data = request.form
+    new_data = request.get_json()
 
     if len(new_data) < 1:
         abort(400)
@@ -135,6 +160,35 @@ def edit_one_user(user: str) -> tuple:
         coders_engine.update_one(user, new_data)
     except ValueError:
         abort(404)
+
+    # sync data between user and language
+    user = new_data['username']
+    langs = new_data['languages']
+
+    # add user to language collection for all his/her languages
+    for lang in langs:
+        current_doc = languages_engine.get_one(lang)
+        try:
+            current_doc.pop('_id', None)
+        except AttributeError:
+            pass
+        if current_doc:
+            if user not in current_doc['users']:
+                current_doc['users'].append(user)
+                languages_engine.update_one(current_doc['name'], current_doc)
+        else:
+            continue
+
+    # check language collection and remove user from languages not mentioned
+    # anymore
+    for doc in languages_engine.get_all():
+        try:
+            doc.pop('_id', None)
+        except AttributeError:
+            pass
+        if user in doc['users'] and doc['name'] not in langs:
+            doc['users'].remove(user)
+        languages_engine.update_one(doc['name'], doc)
 
     return '', 204
 
@@ -173,10 +227,12 @@ def add_languages() -> tuple:
         Confirmation message if success or 400 for failure
     """
 
+    r = request.get_json()
+
     try:
         data = {
-            'name': request.form['name'],
-            'users': request.form['users']
+            'name': r['name'],
+            'users': r['users']
         }
     except ValueError:
         abort(400)
@@ -210,7 +266,7 @@ def get_one_language(language: str) -> dict:
 
 @app.route('/languages/<language>', methods=['DELETE'])
 @security.authenticate.requires_auth
-def delete_one_language(language: str) -> dict:
+def delete_one_language(language: str) -> tuple:
     """
     Delete one route for a single language
 
@@ -224,13 +280,13 @@ def delete_one_language(language: str) -> dict:
     if not languages_engine.get_one(language):
         abort(400)
     languages_engine.delete_one(language)
-    return jsonify({'deleted': True})
+    return '', 204
 
 
 @app.route('/languages/<language>', methods=['PATCH'])
 @security.authenticate.requires_auth
 def edit_one_language(language: str) -> tuple:
-    new_data = request.form
+    new_data = request.get_json()
 
     if len(new_data) < 1:
         abort(400)

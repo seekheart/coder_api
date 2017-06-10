@@ -1,4 +1,5 @@
 import base64
+import json
 import unittest
 
 from app import app
@@ -16,9 +17,14 @@ class AppTest(unittest.TestCase):
                 user=base64.b64encode(b"test:asdf").decode("ascii")
             )
         }
+        self.content_type = 'application/json'
         self.dummy_name = 'dummy'
-        self.dummy_user = {'username': 'dummy', 'languages': ['testLang']}
-        self.dummy_lang = {'name': 'dummy', 'users': ['No one']}
+        self.dummy_user = json.dumps(
+            {'username': 'dummy', 'languages': ['testLang']}
+        )
+        self.dummy_lang = json.dumps(
+            {'name': 'dummy', 'users': ['No one']}
+        )
 
     def tearDown(self):
         """Teardown method to cleanup after each test"""
@@ -52,7 +58,8 @@ class AppTest(unittest.TestCase):
         """Unit test for adding users"""
         result = self.app.post('/users',
                                data=self.dummy_user,
-                               headers=self.authorization)
+                               headers=self.authorization,
+                               content_type=self.content_type)
         self.assertEquals(result.status_code, 201)
 
     def test_post_bad_user(self):
@@ -60,17 +67,22 @@ class AppTest(unittest.TestCase):
 
         bad_user = {'usr': self.dummy_name, 'lang': 'x'}
         result = self.app.post('/users', data=bad_user,
-                               headers=self.authorization)
+                               headers=self.authorization,
+                               content_type=self.content_type)
         self.assertEquals(result.status_code, 400)
 
     def test_post_duplicate_user(self):
         """Unit test for adding a duplicate user"""
 
-        duplicate = {"username": "seekheart",
-                     "languages": ["js", "perl", "python"]
-                     }
-        result = self.app.post('/users', data=duplicate,
-                               headers=self.authorization)
+        self.app.post('/users',
+                      data=self.dummy_user,
+                      headers=self.authorization,
+                      content_type=self.content_type)
+
+        result = self.app.post('/users',
+                               data=self.dummy_user,
+                               headers=self.authorization,
+                               content_type=self.content_type)
 
         self.assertEquals(result.status_code, 409)
 
@@ -78,9 +90,12 @@ class AppTest(unittest.TestCase):
         """Unit test for editing a user"""
 
         self.app.post('/users', data=self.dummy_user,
-                      headers=self.authorization)
+                      headers=self.authorization,
+                      content_type=self.content_type)
+
         result = self.app.patch('/users/dummy', data=self.dummy_user,
-                                headers=self.authorization)
+                                headers=self.authorization,
+                                content_type=self.content_type)
         self.assertEquals(result.status_code, 204)
 
     # Language tests
@@ -98,7 +113,8 @@ class AppTest(unittest.TestCase):
         """Unit test for adding languages"""
         result = self.app.post('/languages',
                                headers=self.authorization,
-                               data=self.dummy_lang)
+                               data=self.dummy_lang,
+                               content_type=self.content_type)
         self.assertEquals(result.status_code, 201)
 
     def test_post_bad_language(self):
@@ -106,21 +122,21 @@ class AppTest(unittest.TestCase):
 
         bad_language = {'usr': self.dummy_name, 'lang': 'x'}
         result = self.app.post('/languages', data=bad_language,
-                               headers=self.authorization)
+                               headers=self.authorization,
+                               content_type=self.content_type)
         self.assertEquals(result.status_code, 400)
 
     def test_post_duplicate_language(self):
         """Unit test for adding a duplicate language"""
 
-        duplicate = {
-            "name": "javascript",
-            "users": [
-                "seekheart",
-                "foobar"
-            ]
-        }
-        result = self.app.post('/languages', data=duplicate,
-                               headers=self.authorization)
+        self.app.post('/languages',
+                      headers=self.authorization,
+                      data=self.dummy_lang,
+                      content_type=self.content_type)
+        result = self.app.post('/languages',
+                               headers=self.authorization,
+                               data=self.dummy_lang,
+                               content_type=self.content_type)
 
         self.assertEquals(result.status_code, 409)
 
@@ -128,7 +144,9 @@ class AppTest(unittest.TestCase):
         """Unit test for editing a language"""
 
         self.app.post('/languages', data=self.dummy_lang,
-                      headers=self.authorization)
+                      headers=self.authorization,
+                      content_type=self.content_type)
         result = self.app.patch('/languages/dummy', data=self.dummy_lang,
-                                headers=self.authorization)
+                                headers=self.authorization,
+                                content_type=self.content_type)
         self.assertEquals(result.status_code, 204)
