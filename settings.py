@@ -13,9 +13,6 @@ PORT = int(os.environ.get('PORT', 3000))
 MULTITHREADING = False
 
 # Mongo settings
-MONGO_COLLECTIONS = {
-    'programming_language': 'languages',
-    'users': 'users'}
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 MONGO_PORT = int(os.environ.get('MONGO_PORT', 27017))
 MONGO_DB = os.environ.get('MONGO_DB', None)

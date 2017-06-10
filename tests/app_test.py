@@ -46,6 +46,16 @@ class AppTest(unittest.TestCase):
         result = self.app.post('/users', data=bad_user)
         self.assertEquals(result.status_code, 400)
 
+    def test_post_duplicate_user(self):
+        """Unit test for adding a duplicate user"""
+
+        duplicate = {"username": "seekheart",
+                     "languages": ["js", "perl", "python"]
+                     }
+        result = self.app.post('/users', data=duplicate)
+
+        self.assertEquals(result.status_code, 409)
+
     def test_patch_single_user(self):
         """Unit test for editing a user"""
 

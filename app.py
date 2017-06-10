@@ -12,14 +12,11 @@ app = Flask(__name__)
 coders_engine = CoderEngine(settings.MONGO_HOST,
                             settings.MONGO_PORT,
                             settings.MONGO_DB,
-                            settings.MONGO_COLLECTIONS
                             )
 languages_engine = CoderEngine(settings.MONGO_HOST,
                                settings.MONGO_PORT,
                                settings.MONGO_DB,
-                               settings.MONGO_COLLECTIONS
                                )
-languages_engine.selected_collection = 'languages'
 
 @app.route('/')
 def test() -> str:
@@ -62,18 +59,21 @@ def post_users() -> dict:
         Confirmation message if success else 400 bad request
     """
 
-    data = request.form
-
     try:
-        user_name = data['username']
-        languages = data['languages']
-    except KeyError:
+        data = {
+            'username': request.form['username'],
+            'languages': request.form['languages']
+        }
+    except ValueError:
         abort(400)
 
-    try:
-        coders_engine.add_one(user_name, languages)
-    except ValueError:
+    if coders_engine.get_one(data['username']):
         abort(409)
+    try:
+        coders_engine.add_one(data)
+    except ValueError:
+        abort(500)
+
 
     return 'Ok', 201
 

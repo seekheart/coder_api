@@ -5,10 +5,8 @@ Mike Tung
 
 import pymongo
 
-
 class CoderEngine:
-    def __init__(self, host: str, port: int, db_name: str, collections: dict,
-                 selected_collection: str = 'users'):
+    def __init__(self, host: str, port: int, db_name: str):
         """
         Constructor method for a Mongo Database Coder Engine
 
@@ -16,9 +14,6 @@ class CoderEngine:
             host: hostname for mongo to connect on
             port: port mongo is listening on
             db_name: name of database in mongo
-            collections: collections available in the database
-            selected_collection: collection currently set to be used by engine
-            defaults to users
 
         Returns:
             Instance of the coder engine
@@ -27,56 +22,26 @@ class CoderEngine:
         self._host = host
         self._port = port
         self.db_name = db_name
-        self.collections = collections
-        self.selected_collection = selected_collection
         self._client = pymongo.MongoClient(host, port)
-
+        self._lookup_doc_template = ['username']
         try:
-            self.db = self._client[self.db_name] \
-                .get_collection(selected_collection)
-        except ConnectionError as e:
+            self.db = self._client[self.db_name].get_collection('users')
+        except ConnectionError:
             print('Error unable to connect to {} in {}'.format(
-                selected_collection, db_name))
-
-    def _get_document_keys(self) -> list:
-        """
-        Private method to make documents for fetching/adding
-
-        Returns:
-            list of document key(s) depending on search flag
-
-        """
-
-        document_keys = {
-            'users': ['username', 'languages'],
-            'languages': ['name', 'users']
-        }
-
-        document = []
-
-        try:
-            document = document_keys[self.selected_collection]
-        except KeyError as e:
-            print(e)
-
-        return document
+                'users', db_name))
 
     def get_one(self, lookup: str) -> dict:
         """
-        Find one method for a given collection
+        Find one method for a coder in the database
 
         Args:
-            lookup: a unique term to search a collection for specific document
+            lookup: a term for looking up a document that is unique
 
         Returns:
              A json document matching the lookup or an empty json if no match
         """
 
-        doc_key = self._get_document_keys().copy()
-        del doc_key[-1]
-        doc_val = [lookup]
-        document = dict(zip(doc_key, doc_val))
-
+        document = dict(zip(self._lookup_doc_template, [lookup]))
         return self.db.find_one(document)
 
     def get_all(self) -> list:
@@ -90,29 +55,22 @@ class CoderEngine:
 
         return [doc for doc in self.db.find()]
 
-    def add_one(self, lookup: str, data: dict) -> None:
+    def add_one(self, data: dict) -> bool:
         """
         A method to add a new document to the collection
 
         Args:
-            lookup: A unique key to search on
             data: data to be entered for this look up
 
         Returns:
-            None
+            bool for success or failure of adding new document
 
         """
-
-        if lookup is None:
-            raise TypeError('Lookup must be string!')
-        if self.get_one(lookup):
-            raise ValueError('Error {} already exists'.format(lookup))
-
-        doc_key = self._get_document_keys()
-        doc_val = [lookup, data]
-        document = dict(zip(doc_key, doc_val))
-
-        self.db.insert_one(document)
+        try:
+            self.db.insert_one(data)
+        except pymongo.errors.DuplicateKeyError:
+            return False
+        return True
 
     def delete_one(self, lookup: str) -> None:
         """
@@ -126,9 +84,7 @@ class CoderEngine:
 
         """
 
-        doc_key = self._get_document_keys()
-        doc_val = [lookup]
-        document = dict(zip(doc_key, doc_val))
+        document = dict(zip(self._lookup_doc_template, [lookup]))
 
         self.db.delete_one(document)
 
@@ -145,7 +101,5 @@ class CoderEngine:
 
         """
 
-        doc_key = self._get_document_keys()
-        doc_val = [lookup]
-        document = dict(zip(doc_key, doc_val))
+        document = dict(zip(self._lookup_doc_template, [lookup]))
         self.db.update_one(document, {'$set': field})
