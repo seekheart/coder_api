@@ -45,7 +45,7 @@ def users() -> dict:
 
 
 @app.route('/users', methods=['POST'])
-def post_users() -> dict:
+def post_users() -> tuple:
     """
     Post route for adding user data
 
@@ -157,27 +157,30 @@ def get_languages() -> dict:
 
 
 @app.route('/languages', methods=['POST'])
-def add_languages() -> dict:
+def add_languages() -> tuple:
     """
     Post route for adding language data
 
     Returns:
         Confirmation message if success or 400 for failure
     """
-    data = request.get_json()
-    lang_name = ''
-    lang_users = ''
 
-    if len(data.keys()) < 1:
-        abort(400)
     try:
-        lang_name = data['name']
-        lang_users = data['users']
-    except KeyError:
+        data = {
+            'name': request.form['name'],
+            'users': request.form['users']
+        }
+    except ValueError:
         abort(400)
 
-    languages_engine.add_one(lang_name, lang_users)
-    return jsonify({'success': True})
+    if languages_engine.get_one(data['name']):
+        abort(409)
+    try:
+        languages_engine.add_one(data)
+    except ValueError:
+        abort(500)
+
+    return 'Ok', 201
 
 
 @app.route('/languages/<language>', methods=['GET'])
@@ -215,10 +218,17 @@ def delete_one_language(language: str) -> dict:
 
 
 @app.route('/languages/<language>', methods=['PATCH'])
-def edit_one_language(language: str) -> dict:
-    new_data = request.get_json()
-    languages_engine.update_one(language, new_data)
-    return jsonify({'updated': True})
+def edit_one_language(language: str) -> tuple:
+    new_data = request.form
+
+    if len(new_data) < 1:
+        abort(400)
+    try:
+        languages_engine.update_one(language, new_data)
+    except ValueError:
+        abort(404)
+
+    return '', 204
 
 
 if __name__ == '__main__':
