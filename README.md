@@ -16,7 +16,7 @@ or update data about themselves through the api.
 
 You will need the following in order to run the api.
 
-- [ ] Python 3.X
+- [ ] Python 3.3+
 - [ ] Mongodb
 - [ ] Virtualenv (optional but recommended)
 
@@ -70,4 +70,4 @@ mongo database.
 * **Mike Tung** - *Main Developer* - [Github]
 
 [Github]: https://github.com/seekheart
-[travis]: https://travis-ci.org/seekheart/coder_api.svg?branch=master
+[travis]: https://travis-ci.org/seekheart/coder_api.svg?branch=dev
