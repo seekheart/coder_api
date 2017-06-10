@@ -1,15 +1,12 @@
 import unittest
 
 import coder_engine.coder_engine as coder_engine
-import settings
 
 
 class CoderEngineTest(unittest.TestCase):
     def setUp(self):
         """Setup method for each test"""
-        self.engine = coder_engine.CoderEngine(settings.MONGO_HOST,
-                                               settings.MONGO_PORT,
-                                               settings.MONGO_DB)
+        self.engine = coder_engine.CoderEngine()
         self.dummy_user = {'username': 'testUser', 'languages': ['testLang']}
         self.lookup = 'testUser'
 
@@ -35,7 +32,7 @@ class CoderEngineTest(unittest.TestCase):
 
     def test_add_one_exists(self):
         """Unit test for testing adding a new document when it already exists"""
-
+        self.engine.add_one(self.dummy_user)
         self.assertRaises(Exception, self.engine.add_one(self.dummy_user))
 
     def test_delete_one(self):

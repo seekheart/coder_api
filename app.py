@@ -5,18 +5,12 @@ Mike Tung
 
 from flask import Flask, jsonify, request, abort
 
+import coder_engine
 import settings
-from coder_engine.coder_engine import CoderEngine
 
 app = Flask(__name__)
-coders_engine = CoderEngine(settings.MONGO_HOST,
-                            settings.MONGO_PORT,
-                            settings.MONGO_DB,
-                            )
-languages_engine = CoderEngine(settings.MONGO_HOST,
-                               settings.MONGO_PORT,
-                               settings.MONGO_DB,
-                               )
+coders_engine = coder_engine.CoderEngine()
+languages_engine = coder_engine.LanguageEngine()
 
 @app.route('/')
 def test() -> str:

@@ -1,5 +1,5 @@
 """
-Coder Database Engine
+Programming language Engine
 Mike Tung
 """
 
@@ -8,18 +8,16 @@ import pymongo
 import coder_engine.mongo_engine as mongo_engine
 
 
-class CoderEngine(mongo_engine.MongoEngine):
+class LanguageEngine(mongo_engine.MongoEngine):
     def __init__(self):
-        """
-        Constructor method for a Coder Engine"""
+        """Constructor method for language engine"""
 
-        super(CoderEngine, self).__init__('users')
-
-        self._lookup_doc_template = ['username']
+        super(LanguageEngine, self).__init__('languages')
+        self._lookup_doc_template = ['name']
 
     def get_one(self, lookup: str) -> dict:
         """
-        Find one method for a coder in the database
+        Find one method for a language in the database
 
         Args:
             lookup: a term for looking up a document that is unique
@@ -64,7 +62,7 @@ class CoderEngine(mongo_engine.MongoEngine):
 
     def delete_one(self, lookup: str) -> None:
         """
-        A method to delete a user from the collection
+        A method to delete a language from the collection
 
         Args:
             lookup: lookup term that is unique to delete on
@@ -80,7 +78,7 @@ class CoderEngine(mongo_engine.MongoEngine):
 
     def update_one(self, lookup: str, field: dict) -> None:
         """
-        A method to update a user in collection
+        A method to update a language in collection
 
         Args:
             lookup: lookup term
