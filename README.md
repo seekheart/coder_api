@@ -4,5 +4,3 @@
 
 A restful api designed to deliver data regarding coders and programming 
 languages.
-
-TODO: Develop readme further
