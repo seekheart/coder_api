@@ -70,4 +70,4 @@ mongo database.
 * **Mike Tung** - *Main Developer* - [Github]
 
 [Github]: https://github.com/seekheart
-[travis]: https://travis-ci.org/seekheart/coder_api.svg?branch=master
+[travis]: https://travis-ci.org/seekheart/coder_api.svg?branch=dev
