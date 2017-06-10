@@ -1,6 +1,6 @@
 import unittest
 
-import coder_engine.coder_engine as coder_engine
+import data_engines.coder_engine as coder_engine
 
 
 class CoderEngineTest(unittest.TestCase):
