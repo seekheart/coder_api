@@ -6,6 +6,7 @@ Mike Tung
 from flask import Flask, jsonify, request, abort
 
 import data_engines
+import security
 import settings
 
 app = Flask(__name__)
@@ -24,6 +25,7 @@ def test() -> str:
 
 
 @app.route('/users', methods=['GET'])
+@security.authenticate.requires_auth
 def users() -> dict:
     """
     Get route for all users
@@ -45,6 +47,7 @@ def users() -> dict:
 
 
 @app.route('/users', methods=['POST'])
+@security.authenticate.requires_auth
 def post_users() -> tuple:
     """
     Post route for adding user data
@@ -73,6 +76,7 @@ def post_users() -> tuple:
 
 
 @app.route('/users/<user>', methods=['GET'])
+@security.authenticate.requires_auth
 def get_one_user(user: str) -> dict:
     """
     Get route for a single user
@@ -94,6 +98,7 @@ def get_one_user(user: str) -> dict:
 
 
 @app.route('/users/<user>', methods=['DELETE'])
+@security.authenticate.requires_auth
 def delete_one_user(user: str) -> tuple:
     """
     Delete route to remove a user
@@ -111,6 +116,7 @@ def delete_one_user(user: str) -> tuple:
 
 
 @app.route('/users/<user>', methods=['PATCH'])
+@security.authenticate.requires_auth
 def edit_one_user(user: str) -> tuple:
     """
     Patch route to edit a user's data
@@ -135,6 +141,7 @@ def edit_one_user(user: str) -> tuple:
 
 
 @app.route('/languages', methods=['GET'])
+@security.authenticate.requires_auth
 def get_languages() -> dict:
     """
     Get route for all languages
@@ -157,6 +164,7 @@ def get_languages() -> dict:
 
 
 @app.route('/languages', methods=['POST'])
+@security.authenticate.requires_auth
 def add_languages() -> tuple:
     """
     Post route for adding language data
@@ -184,6 +192,7 @@ def add_languages() -> tuple:
 
 
 @app.route('/languages/<language>', methods=['GET'])
+@security.authenticate.requires_auth
 def get_one_language(language: str) -> dict:
     """
     Get one route for a single language
@@ -200,6 +209,7 @@ def get_one_language(language: str) -> dict:
 
 
 @app.route('/languages/<language>', methods=['DELETE'])
+@security.authenticate.requires_auth
 def delete_one_language(language: str) -> dict:
     """
     Delete one route for a single language
@@ -218,6 +228,7 @@ def delete_one_language(language: str) -> dict:
 
 
 @app.route('/languages/<language>', methods=['PATCH'])
+@security.authenticate.requires_auth
 def edit_one_language(language: str) -> tuple:
     new_data = request.form
 
