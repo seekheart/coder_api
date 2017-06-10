@@ -16,7 +16,7 @@ or update data about themselves through the api.
 
 You will need the following in order to run the api.
 
-- [ ] Python 3.X
+- [ ] Python 3.3+
 - [ ] Mongodb
 - [ ] Virtualenv (optional but recommended)
 
