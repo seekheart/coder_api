@@ -57,9 +57,10 @@ def post_users() -> tuple:
     """
 
     try:
+        r = request.get_json()
         data = {
-            'username': request.form['username'],
-            'languages': request.form['languages']
+            'username': r['username'],
+            'languages': r['languages']
         }
     except ValueError:
         abort(400)
@@ -70,6 +71,17 @@ def post_users() -> tuple:
         coders_engine.add_one(data)
     except ValueError:
         abort(500)
+
+    for lang in data['languages']:
+        if languages_engine.get_one(lang):
+            doc = languages_engine.get_one(lang)
+            if data['username'] not in doc['users']:
+                doc['users'].append(data['username'])
+                languages_engine.update_one(lang, doc)
+            continue
+        else:
+            doc = {'name': lang, 'users': [data['username']]}
+            languages_engine.add_one(doc)
 
 
     return 'Ok', 201
@@ -127,7 +139,7 @@ def edit_one_user(user: str) -> tuple:
     Returns:
         update message if success else 404 not found or 400 if bad data
     """
-    new_data = request.form
+    new_data = request.get_json()
 
     if len(new_data) < 1:
         abort(400)
@@ -173,10 +185,12 @@ def add_languages() -> tuple:
         Confirmation message if success or 400 for failure
     """
 
+    r = request.get_json()
+
     try:
         data = {
-            'name': request.form['name'],
-            'users': request.form['users']
+            'name': r['name'],
+            'users': r['users']
         }
     except ValueError:
         abort(400)
@@ -210,7 +224,7 @@ def get_one_language(language: str) -> dict:
 
 @app.route('/languages/<language>', methods=['DELETE'])
 @security.authenticate.requires_auth
-def delete_one_language(language: str) -> dict:
+def delete_one_language(language: str) -> tuple:
     """
     Delete one route for a single language
 
@@ -224,13 +238,13 @@ def delete_one_language(language: str) -> dict:
     if not languages_engine.get_one(language):
         abort(400)
     languages_engine.delete_one(language)
-    return jsonify({'deleted': True})
+    return '', 204
 
 
 @app.route('/languages/<language>', methods=['PATCH'])
 @security.authenticate.requires_auth
 def edit_one_language(language: str) -> tuple:
-    new_data = request.form
+    new_data = request.get_json()
 
     if len(new_data) < 1:
         abort(400)
