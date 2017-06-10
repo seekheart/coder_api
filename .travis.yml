@@ -2,15 +2,7 @@ language: python
 python:
   - "3.3"
   - "3.6"
-services:
-  - mongodb
 install: "pip install -r requirements.txt"
 
-before_script:
-  - python mocking/language_data_mocker.py
-  - python mocking/user_data_mocker.py
-  - mongoimport --db coder --collection users --drop --file ./test_data.json
-  - mongoimport --db coder --collection languages --drop --file
-  ./test_data_lang.json
-
-script: "nosetests tests"
+services:
+  - mongodb
