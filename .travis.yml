@@ -10,7 +10,4 @@ services:
 script: nosetests
 
 before_script:
-  - mongoimport --db coder --collection users --file ./mocking/test_data.json
-   --jsonArray
-  - mongoimport --db coder --collection languages --file ./mocking/test_data
-  _lang.json --jsonArray
+  - bash mocking/mongodb_seeder.bash
