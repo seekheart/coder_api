@@ -16,3 +16,8 @@ notification:
   email:
     on_success: always
     on_failure: change
+
+branches:
+  only:
+  - master
+  - dev
