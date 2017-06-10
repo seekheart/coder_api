@@ -92,6 +92,7 @@ class AppTest(unittest.TestCase):
         self.app.post('/users', data=self.dummy_user,
                       headers=self.authorization,
                       content_type=self.content_type)
+
         result = self.app.patch('/users/dummy', data=self.dummy_user,
                                 headers=self.authorization,
                                 content_type=self.content_type)
