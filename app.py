@@ -129,6 +129,7 @@ def delete_one_user(user: str) -> tuple:
     for lang in languages_engine.get_all():
         if user in lang['users']:
             lang['users'].remove(user)
+            lang.pop('_id', None)
             languages_engine.update_one(lang['name'], lang)
     return '', 204
 
@@ -164,6 +165,7 @@ def edit_one_user(user: str) -> tuple:
         if current_doc:
             if user not in current_doc['users']:
                 current_doc['users'].append(user)
+                current_doc.pop('_id', None)
                 languages_engine.update_one(current_doc['name'], current_doc)
         else:
             continue
@@ -173,6 +175,7 @@ def edit_one_user(user: str) -> tuple:
     for doc in languages_engine.get_all():
         if user in doc['users'] and doc['name'] not in langs:
             doc['users'].remove(user)
+            doc.pop('_id', None)
         languages_engine.update_one(doc['name'], doc)
 
     return '', 204
