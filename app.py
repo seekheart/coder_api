@@ -124,6 +124,12 @@ def delete_one_user(user: str) -> tuple:
     if not coders_engine.get_one(user):
         abort(400)
     coders_engine.delete_one(user)
+
+    # remove user from language collection
+    for lang in languages_engine.get_all():
+        if user in lang['users']:
+            lang['users'].remove(user)
+            languages_engine.update_one(lang['name'], lang)
     return '', 204
 
 
@@ -147,6 +153,27 @@ def edit_one_user(user: str) -> tuple:
         coders_engine.update_one(user, new_data)
     except ValueError:
         abort(404)
+
+    # sync data between user and language
+    user = new_data['username']
+    langs = new_data['languages']
+
+    # add user to language collection for all his/her languages
+    for lang in langs:
+        current_doc = languages_engine.get_one(lang)
+        if current_doc:
+            if user not in current_doc['users']:
+                current_doc['users'].append(user)
+                languages_engine.update_one(current_doc['name'], current_doc)
+        else:
+            continue
+
+    # check language collection and remove user from languages not mentioned
+    # anymore
+    for doc in languages_engine.get_all():
+        if user in doc['users'] and doc['name'] not in langs:
+            doc['users'].remove(user)
+        languages_engine.update_one(doc['name'], doc)
 
     return '', 204
 
