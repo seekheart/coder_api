@@ -11,3 +11,8 @@ script: nosetests
 
 before_script:
   - bash mocking/mongodb_seeder.bash
+
+notification:
+  email:
+    on_success: always
+    on_failure: change
