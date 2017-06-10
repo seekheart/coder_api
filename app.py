@@ -5,21 +5,13 @@ Mike Tung
 
 from flask import Flask, jsonify, request, abort
 
+import data_engines
+import security
 import settings
-from coder_engine.coder_engine import CoderEngine
 
 app = Flask(__name__)
-coders_engine = CoderEngine(settings.MONGO_HOST,
-                            settings.MONGO_PORT,
-                            settings.MONGO_DB,
-                            settings.MONGO_COLLECTIONS
-                            )
-languages_engine = CoderEngine(settings.MONGO_HOST,
-                               settings.MONGO_PORT,
-                               settings.MONGO_DB,
-                               settings.MONGO_COLLECTIONS
-                               )
-languages_engine.selected_collection = 'languages'
+coders_engine = data_engines.CoderEngine()
+languages_engine = data_engines.LanguageEngine()
 
 @app.route('/')
 def test() -> str:
@@ -33,6 +25,7 @@ def test() -> str:
 
 
 @app.route('/users', methods=['GET'])
+@security.authenticate.requires_auth
 def users() -> dict:
     """
     Get route for all users
@@ -54,7 +47,8 @@ def users() -> dict:
 
 
 @app.route('/users', methods=['POST'])
-def post_users() -> dict:
+@security.authenticate.requires_auth
+def post_users() -> tuple:
     """
     Post route for adding user data
 
@@ -62,23 +56,27 @@ def post_users() -> dict:
         Confirmation message if success else 400 bad request
     """
 
-    data = request.form
-
     try:
-        user_name = data['username']
-        languages = data['languages']
-    except KeyError:
+        data = {
+            'username': request.form['username'],
+            'languages': request.form['languages']
+        }
+    except ValueError:
         abort(400)
 
-    try:
-        coders_engine.add_one(user_name, languages)
-    except ValueError:
+    if coders_engine.get_one(data['username']):
         abort(409)
+    try:
+        coders_engine.add_one(data)
+    except ValueError:
+        abort(500)
+
 
     return 'Ok', 201
 
 
 @app.route('/users/<user>', methods=['GET'])
+@security.authenticate.requires_auth
 def get_one_user(user: str) -> dict:
     """
     Get route for a single user
@@ -100,6 +98,7 @@ def get_one_user(user: str) -> dict:
 
 
 @app.route('/users/<user>', methods=['DELETE'])
+@security.authenticate.requires_auth
 def delete_one_user(user: str) -> tuple:
     """
     Delete route to remove a user
@@ -117,6 +116,7 @@ def delete_one_user(user: str) -> tuple:
 
 
 @app.route('/users/<user>', methods=['PATCH'])
+@security.authenticate.requires_auth
 def edit_one_user(user: str) -> tuple:
     """
     Patch route to edit a user's data
@@ -141,6 +141,7 @@ def edit_one_user(user: str) -> tuple:
 
 
 @app.route('/languages', methods=['GET'])
+@security.authenticate.requires_auth
 def get_languages() -> dict:
     """
     Get route for all languages
@@ -163,30 +164,35 @@ def get_languages() -> dict:
 
 
 @app.route('/languages', methods=['POST'])
-def add_languages() -> dict:
+@security.authenticate.requires_auth
+def add_languages() -> tuple:
     """
     Post route for adding language data
 
     Returns:
         Confirmation message if success or 400 for failure
     """
-    data = request.get_json()
-    lang_name = ''
-    lang_users = ''
 
-    if len(data.keys()) < 1:
-        abort(400)
     try:
-        lang_name = data['name']
-        lang_users = data['users']
-    except KeyError:
+        data = {
+            'name': request.form['name'],
+            'users': request.form['users']
+        }
+    except ValueError:
         abort(400)
 
-    languages_engine.add_one(lang_name, lang_users)
-    return jsonify({'success': True})
+    if languages_engine.get_one(data['name']):
+        abort(409)
+    try:
+        languages_engine.add_one(data)
+    except ValueError:
+        abort(500)
+
+    return 'Ok', 201
 
 
 @app.route('/languages/<language>', methods=['GET'])
+@security.authenticate.requires_auth
 def get_one_language(language: str) -> dict:
     """
     Get one route for a single language
@@ -203,6 +209,7 @@ def get_one_language(language: str) -> dict:
 
 
 @app.route('/languages/<language>', methods=['DELETE'])
+@security.authenticate.requires_auth
 def delete_one_language(language: str) -> dict:
     """
     Delete one route for a single language
@@ -221,10 +228,18 @@ def delete_one_language(language: str) -> dict:
 
 
 @app.route('/languages/<language>', methods=['PATCH'])
-def edit_one_language(language: str) -> dict:
-    new_data = request.get_json()
-    languages_engine.update_one(language, new_data)
-    return jsonify({'updated': True})
+@security.authenticate.requires_auth
+def edit_one_language(language: str) -> tuple:
+    new_data = request.form
+
+    if len(new_data) < 1:
+        abort(400)
+    try:
+        languages_engine.update_one(language, new_data)
+    except ValueError:
+        abort(404)
+
+    return '', 204
 
 
 if __name__ == '__main__':
