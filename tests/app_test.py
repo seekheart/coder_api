@@ -91,7 +91,7 @@ class AppTest(unittest.TestCase):
 
     def test_get_single_language(self):
         """Unit test for getting a user"""
-        result = self.app.get('/languages/angular', headers=self.authorization)
+        result = self.app.get('/languages/python', headers=self.authorization)
         self.assertEquals(result.status_code, 200)
 
     def test_post_single_language(self):
