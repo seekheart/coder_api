@@ -73,8 +73,9 @@ def post_users() -> tuple:
         abort(500)
 
     for lang in data['languages']:
-        if languages_engine.get_one(lang):
-            doc = languages_engine.get_one(lang)
+        doc = languages_engine.get_one(lang)
+        doc.pop('_id', None)
+        if doc:
             if data['username'] not in doc['users']:
                 doc['users'].append(data['username'])
                 languages_engine.update_one(lang, doc)
@@ -82,7 +83,6 @@ def post_users() -> tuple:
         else:
             doc = {'name': lang, 'users': [data['username']]}
             languages_engine.add_one(doc)
-
 
     return 'Ok', 201
 
@@ -127,9 +127,9 @@ def delete_one_user(user: str) -> tuple:
 
     # remove user from language collection
     for lang in languages_engine.get_all():
+        lang.pop('_id', None)
         if user in lang['users']:
             lang['users'].remove(user)
-            lang.pop('_id', None)
             languages_engine.update_one(lang['name'], lang)
     return '', 204
 
@@ -162,10 +162,10 @@ def edit_one_user(user: str) -> tuple:
     # add user to language collection for all his/her languages
     for lang in langs:
         current_doc = languages_engine.get_one(lang)
+        current_doc.pop('_id', None)
         if current_doc:
             if user not in current_doc['users']:
                 current_doc['users'].append(user)
-                current_doc.pop('_id', None)
                 languages_engine.update_one(current_doc['name'], current_doc)
         else:
             continue
@@ -173,9 +173,9 @@ def edit_one_user(user: str) -> tuple:
     # check language collection and remove user from languages not mentioned
     # anymore
     for doc in languages_engine.get_all():
+        doc.pop('_id', None)
         if user in doc['users'] and doc['name'] not in langs:
             doc['users'].remove(user)
-            doc.pop('_id', None)
         languages_engine.update_one(doc['name'], doc)
 
     return '', 204
