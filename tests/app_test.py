@@ -112,9 +112,13 @@ class AppTest(unittest.TestCase):
     def test_post_duplicate_language(self):
         """Unit test for adding a duplicate language"""
 
-        duplicate = {"name": "angular",
-                     "users": ["seekheart", "test2"]
-                     }
+        duplicate = {
+            "name": "javascript",
+            "users": [
+                "seekheart",
+                "foobar"
+            ]
+        }
         result = self.app.post('/languages', data=duplicate,
                                headers=self.authorization)
 
