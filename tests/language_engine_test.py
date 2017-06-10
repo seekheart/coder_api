@@ -23,7 +23,7 @@ class LanguageEngineTest(unittest.TestCase):
     def test_get_one(self):
         """Unit Test for getting a single document"""
 
-        self.assertNotEquals(self.engine.get_one('angular'), None)
+        self.assertNotEquals(self.engine.get_one('javascript'), None)
 
     def test_add_one(self):
         """Unit test for adding a new document"""
