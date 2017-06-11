@@ -1,8 +1,8 @@
 # Coders Api
-
+[![version](https://img.shields.io/badge/Version-1.0.1-blue.svg)]()
 [![Build Status][travis]](https://travis-ci.org/seekheart/coder_api)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
-[![version](https://img.shields.io/badge/Version-1.0.0-blue.svg)]()
+
 
 A restful api for serving data regarding coders and the programming languages
 they know and can assist with. The api is primarily used by a discord bot
