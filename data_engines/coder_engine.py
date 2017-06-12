@@ -3,10 +3,10 @@ Coder Database Engine
 Mike Tung
 """
 
-import data_engines.mongo_engine as mongo_engine
+import data_engines
 
 
-class CoderEngine(mongo_engine.MongoEngine):
+class CoderEngine(data_engines.MongoEngine):
     def __init__(self):
         """
         Constructor method for a Coder Engine"""

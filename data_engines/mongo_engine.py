@@ -27,7 +27,6 @@ class MongoEngine:
         except ConnectionError:
             print('Error connecting to database!')
 
-
     def get_one(self, lookup: str) -> dict:
         """
         Find one method for document in collection
@@ -66,9 +65,7 @@ class MongoEngine:
         """
         try:
             self.db.insert_one(data)
-        except ValueError:
-            return False
-        except pymongo.errors.DuplicateKeyError:
+        except (ValueError, pymongo.errors.DuplicateKeyError):
             return False
 
         return True
@@ -86,7 +83,6 @@ class MongoEngine:
         """
 
         self.document[self._lookup_doc_template] = lookup
-
         self.db.delete_one(self.document)
 
     def update_one(self, lookup: str, field: dict) -> None:
