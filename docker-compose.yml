@@ -1,0 +1,20 @@
+version: "3"
+services:
+  api:
+    build: .
+    ports:
+      - "6000:3000"
+    environment:
+      - HOST=0.0.0.0
+      - ENV=PROD
+      - API_USER=discord
+      - API_PW=coderz
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      - MONGO_DB=coder
+    links:
+      - mongodb
+  mongodb:
+    image: mongo
+    volumes:
+      - /data:/data/db

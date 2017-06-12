@@ -1,5 +1,5 @@
 # Coders Api
-
+[![version](https://img.shields.io/badge/Version-1.0.1-blue.svg)]()
 [![Build Status][travis]](https://travis-ci.org/seekheart/coder_api)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
 
