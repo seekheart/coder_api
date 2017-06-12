@@ -3,10 +3,10 @@ Programming language Engine
 Mike Tung
 """
 
-import data_engines
+import data_engines.mongo_engine as mongo_engine
 
 
-class LanguageEngine(data_engines.MongoEngine):
+class LanguageEngine(mongo_engine.MongoEngine):
     def __init__(self):
         """Constructor method for language engine"""
 
