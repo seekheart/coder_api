@@ -260,7 +260,10 @@ def get_one_language(language: str) -> dict:
     """
 
     data = languages_engine.get_one(language)
-    payload = {k: v for k, v in data.items() if k != '_id'}
+    try:
+        payload = {k: v for k, v in data.items() if k != '_id'}
+    except AttributeError:
+        abort(404)
     return jsonify(payload)
 
 
