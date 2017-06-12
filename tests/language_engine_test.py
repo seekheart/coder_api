@@ -1,12 +1,12 @@
 import unittest
 
-import data_engines.language_engine as language_engine
+import data_engines
 
 
 class LanguageEngineTest(unittest.TestCase):
     def setUp(self):
         """Setup method for each test"""
-        self.engine = language_engine.LanguageEngine()
+        self.engine = data_engines.LanguageEngine()
         self.language = {'name': 'test', 'users': ['testUser']}
         self.lookup = 'test'
 

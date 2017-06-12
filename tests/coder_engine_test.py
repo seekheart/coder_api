@@ -1,12 +1,12 @@
 import unittest
 
-import data_engines.coder_engine as coder_engine
+import data_engines
 
 
 class CoderEngineTest(unittest.TestCase):
     def setUp(self):
         """Setup method for each test"""
-        self.engine = coder_engine.CoderEngine()
+        self.engine = data_engines.CoderEngine()
         self.dummy_user = {'username': 'testUser', 'languages': ['testLang']}
         self.lookup = 'testUser'
 
